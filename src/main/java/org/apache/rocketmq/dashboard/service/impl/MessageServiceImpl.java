@@ -97,6 +97,7 @@ public class MessageServiceImpl implements MessageService {
             List<MessageTrack> messageTrackList = messageTrackDetail(messageExt);
             return new Pair<>(MessageView.fromMessageExt(messageExt), messageTrackList);
         } catch (Exception e) {
+            logger.error("viewMessage by msgId {} of topic {} error. ", subject, msgId, e);
             throw new ServiceException(-1, String.format("Failed to query message by Id: %s", msgId));
         }
     }
