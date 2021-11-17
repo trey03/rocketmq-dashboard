@@ -36,6 +36,10 @@ import static org.apache.rocketmq.client.ClientConfig.SEND_MESSAGE_WITH_VIP_CHAN
 @ConfigurationProperties(prefix = "rocketmq.config")
 public class RMQConfigure {
 
+    private final static String ACCESS_KEY = "access.key";
+    private final static String SECRET_KEY = "secret.key";
+    private final static String LOGIN_REQUIRED = "login.required";
+
     private Logger logger = LoggerFactory.getLogger(RMQConfigure.class);
     //use rocketmq.namesrv.addr first,if it is empty,than use system proerty or system env
     private volatile String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV));
@@ -58,15 +62,29 @@ public class RMQConfigure {
     private Long timeoutMillis;
 
     public String getAccessKey() {
-        return accessKey;
+        return getValueOrEnvValue(accessKey, ACCESS_KEY);
     }
 
     public void setAccessKey(String accessKey) {
         this.accessKey = accessKey;
     }
 
+    /**
+     * 如果没有配置从env中获取
+     * @param value
+     * @param envKey
+     * @return
+     */
+    String getValueOrEnvValue(String value, String envKey){
+        String data = value;
+        if (StringUtils.isEmpty(data)) {
+            data = System.getenv(envKey);
+        }
+        return data;
+    }
+
     public String getSecretKey() {
-        return secretKey;
+        return getValueOrEnvValue(secretKey, SECRET_KEY);
     }
 
     public void setSecretKey(String secretKey) {
@@ -121,6 +139,10 @@ public class RMQConfigure {
     }
 
     public boolean isLoginRequired() {
+        String envValue = getValueOrEnvValue("", LOGIN_REQUIRED);
+        if (StringUtils.isNotEmpty(envValue) && !loginRequired) {
+            loginRequired = Boolean.parseBoolean(envValue);
+        }
         return loginRequired;
     }
 
